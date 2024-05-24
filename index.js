@@ -34,16 +34,42 @@ async function run() {
     const database = client.db("UsersDb");
     const usersCollection = database.collection("users");
 
-    // delete one user from database 
 
-    app.delete('/users/:id',async(req,res)=>{
+    // get single users or one user only
+    app.get('/users/:id',async(req,res)=>{
         const id =req.params.id;
-        console.log('delete from database',id)
-
-        const query={_id: new ObjectId(id)}
-        const result = await usersCollection.deleteOne(query)
+        const query ={_id: new ObjectId(id)}
+        const result = await usersCollection.findOne(query)
         res.send(result)
     })
+
+    // update one document that exist in db and if not then put it in db 
+
+    app.put('/users/:id',async(req,res)=>{
+        const id =req.params.id
+        const user =req.body;
+        console.log(id,user)
+        const filter ={_id: new ObjectId(id)}
+        const options ={upsert:true}
+        const updateUser ={
+            $set:{
+                name:user.name,
+                email:user.email
+            }
+        }
+        const result = await usersCollection.updateOne(filter,updateUser,options)
+        res.send(result)
+    })
+
+    // delete one user from database 
+
+  app.delete('/users/:id',async(req,res)=>{
+    const id =req.params.id;
+    const query ={_id: new ObjectId(id)}
+    const result = await usersCollection.deleteOne(query)
+    res.send(result)
+
+  })
 
 
     // get all users by get method 
